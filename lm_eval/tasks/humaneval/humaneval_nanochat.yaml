@@ -16,7 +16,7 @@ metric_list:
 generation_kwargs:
   until:
     - "<|assistant_end|>"
-  max_gen_toks: 1024
+  max_gen_toks: 512
   do_sample: false
 repeats: 1
 num_fewshot: 0
@@ -24,6 +24,6 @@ filter_list:
   - name: "create_test"
     filter:
       - function: "custom"
-        filter_fn: !function utils.build_predictions
+        filter_fn: !function humaneval_nanochat_utils.build_predictions_nanochat
 metadata:
   version: 1.0
