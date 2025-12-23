@@ -1469,6 +1469,17 @@ class HFLM(TemplateLM):
                 stop=until,
                 **kwargs,
             )
+            if eval_logger.isEnabledFor(logging.DEBUG):
+                try:
+                    decoded = [self.tok_decode(seq.tolist()) for seq in cont]
+                    # full decode for debugging (truncated in log to avoid spam)
+                    eval_logger.debug(
+                        "[debug] generate_until returned lens=%s decoded_head=%s",
+                        [len(seq) for seq in cont],
+                        [d[:200].replace("\n", "\\n") for d in decoded],
+                    )
+                except Exception:
+                    pass
 
             cont_toks_list = cont.tolist()
             for cont_toks, context in zip(cont_toks_list, contexts, strict=True):

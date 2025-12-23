@@ -1,0 +1,29 @@
+task: humaneval_nanochat
+dataset_path: openai/openai_humaneval
+unsafe_code: true
+output_type: generate_until
+test_split: test
+# Plain prompt aligned to nanochat's render_for_completion (single user turn).
+# Manually wrap with special tokens (do not use --apply_chat_template).
+doc_to_text: |
+  <|bos|><|user_start|>{{prompt}}<|user_end|><|assistant_start|>
+doc_to_target: "{{test}}\ncheck({{entry_point}})"
+metric_list:
+  - metric: !function utils.pass_at_k
+    aggregation: mean
+    higher_is_better: true
+    k: [1]
+generation_kwargs:
+  until:
+    - "<|assistant_end|>"
+  max_gen_toks: 1024
+  do_sample: false
+repeats: 1
+num_fewshot: 0
+filter_list:
+  - name: "create_test"
+    filter:
+      - function: "custom"
+        filter_fn: !function utils.build_predictions
+metadata:
+  version: 1.0

@@ -38,6 +38,40 @@ class TaskManager:
         self._task_index = self.initialize_tasks(
             include_path=include_path, include_defaults=include_defaults
         )
+        # Initialize cached lists (mirrors refresh_tasks)
+        self._all_tasks = sorted(list(self._task_index.keys()))
+        self._all_groups = sorted(
+            [x for x in self._all_tasks if self._task_index[x]["type"] == "group"]
+        )
+        self._all_subtasks = sorted(
+            [
+                x
+                for x in self._all_tasks
+                if self._task_index[x]["type"] in ["task", "python_task"]
+            ]
+        )
+        self._all_tags = sorted(
+            [x for x in self._all_tasks if self._task_index[x]["type"] == "tag"]
+        )
+        self.task_group_map = collections.defaultdict(list)
+
+    def refresh_tasks(self):
+        """Reload task registry (useful after adding local tasks)."""
+        self._task_index = self.initialize_tasks(
+            include_path=self.include_path, include_defaults=True
+        )
+
+    def refresh_tasks(self):
+        """Reload task registry (useful after adding local tasks)."""
+        self._task_index = self.initialize_tasks(
+            include_path=self.include_path, include_defaults=True
+        )
+
+    def refresh_tasks(self):
+        """Reload task registry (useful after adding local tasks)."""
+        self._task_index = self.initialize_tasks(
+            include_path=self.include_path, include_defaults=True
+        )
         self._all_tasks = sorted(list(self._task_index.keys()))
 
         self._all_groups = sorted(
@@ -723,3 +757,6 @@ def get_task_dict(
             eval_logger.info(f"{key}: {value}")
 
     return final_task_dict
+# Custom nanochat-aligned tasks
+from lm_eval.tasks.gsm8k_nanochat import gsm8k_nanochat
+from lm_eval.tasks.humaneval_nanochat import humaneval_nanochat
