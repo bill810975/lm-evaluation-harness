@@ -460,6 +460,19 @@ class HFLM(TemplateLM):
     @property
     def max_length(self) -> int:
         if self._max_length:  # if max length manually set, return it
+            seqlen_config_attrs = ("n_positions", "max_position_embeddings", "n_ctx")
+            cfg_max = None
+            for attr in seqlen_config_attrs:
+                if hasattr(self.model.config, attr):
+                    cfg_max = getattr(self.model.config, attr)
+                    break
+            if cfg_max and self._max_length > cfg_max:
+                eval_logger.warning(
+                    "Requested max_length=%s exceeds model limit=%s; capping to model limit.",
+                    self._max_length,
+                    cfg_max,
+                )
+                self._max_length = int(cfg_max)
             return self._max_length
         seqlen_config_attrs = ("n_positions", "max_position_embeddings", "n_ctx")
         for attr in seqlen_config_attrs:

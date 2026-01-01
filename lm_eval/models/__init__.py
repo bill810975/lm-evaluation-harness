@@ -51,6 +51,7 @@ MODEL_MAPPING = {
     "vllm-vlm": "lm_eval.models.vllm_vlms:VLLM_VLM",
     "watsonx_llm": "lm_eval.models.ibm_watsonx_ai:IBMWatsonxAI",
     "hf-nanochat-tool": "lm_eval.models.hf_nanochat_tool:NanoChatToolLM",
+    "hf-nanochat-no-tool": "lm_eval.models.hf_nanochat_no_tool:NanoChatNoToolLM",
 }
 
 
