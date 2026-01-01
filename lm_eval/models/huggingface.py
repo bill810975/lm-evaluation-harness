@@ -1455,10 +1455,41 @@ class HFLM(TemplateLM):
             # set the max length in tokens of inputs ("context_enc")
             if self.backend == "causal":
                 # max len for inputs = max length, minus room to generate the max new tokens
+                context_lengths = [len(self.tok_encode(ctx)) for ctx in contexts]
+                max_context_len = max(context_lengths) if context_lengths else 0
+                if max_context_len < self.max_length:
+                    available = self.max_length - max_context_len
+                    if max_gen_toks > available:
+                        eval_logger.warning(
+                            "Requested max_gen_toks (%s) exceeds available window (%s). "
+                            "Clamping max_gen_toks to %s to avoid truncation.",
+                            max_gen_toks,
+                            available,
+                            available,
+                        )
+                        max_gen_toks = available
+
                 max_ctx_len = self.max_length - max_gen_toks
-                assert max_ctx_len > 0, (
-                    f"Invalid configuration: requested max tokens to generate ({max_gen_toks}) must be less than model's maximum sequence length ({self.max_length})."
-                )
+                if max_ctx_len < 1:
+                    if self.max_length > 1:
+                        adjusted = self.max_length - 1
+                        if adjusted != max_gen_toks:
+                            eval_logger.warning(
+                                "Requested max_gen_toks (%s) >= model max_length (%s); "
+                                "clamping max_gen_toks to %s and left-truncating context.",
+                                max_gen_toks,
+                                self.max_length,
+                                adjusted,
+                            )
+                        max_gen_toks = adjusted
+                        max_ctx_len = self.max_length - max_gen_toks
+                    else:
+                        eval_logger.warning(
+                            "Model max_length (%s) leaves no room for generation; disabling max_gen_toks.",
+                            self.max_length,
+                        )
+                        max_gen_toks = 0
+                        max_ctx_len = self.max_length
             elif self.backend == "seq2seq":
                 # max len for inputs = encoder's whole max_length
                 max_ctx_len = self.max_length
